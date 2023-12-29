@@ -10,7 +10,7 @@
 typedef struct TiempoDeVida {
     time_t creacion; // Momento en que se creó el proceso
     int tiempo_asignado; // Tiempo asignado hasta que el proceso muere
-};
+}TiempoDeVida;
 
 // Estructura PCB con la nueva variable de estado del proceso
 typedef struct PCB {
@@ -25,7 +25,7 @@ typedef struct PCB {
  PCB* inicializarPCB(int id, int prioridad, int estado, int tiempo_asignado) {
     PCB* pcb = (PCB*)malloc(sizeof(struct PCB));
     if (pcb == NULL) {
-        printf("Error: No se pudo asignar memoria para el PCB.\n");
+        ("Error: No se pudo asignar memoria para el PCB.\n");
         exit(1);
     }
 
@@ -43,55 +43,54 @@ typedef struct PCB {
     return pcb;
 }
 
-#include "pcb.h"
 
 // Función para obtener el identificador de un PCB
-int obtenerIdentificador(struct PCB* pcb) {
+int obtenerIdentificador( PCB* pcb) {
     return pcb->identificador;
 }
 
 // Función para establecer el identificador de un PCB
-void establecerIdentificador(struct PCB* pcb, int id) {
+void establecerIdentificador( PCB* pcb, int id) {
     pcb->identificador = id;
 }
 
 // Función para obtener la prioridad de un PCB
-int obtenerPrioridad(struct PCB* pcb) {
+int obtenerPrioridad( PCB* pcb) {
     return pcb->prioridad;
 }
 
 // Función para establecer la prioridad de un PCB
-void establecerPrioridad(struct PCB* pcb, int prioridad) {
+void establecerPrioridad( PCB* pcb, int prioridad) {
     pcb->prioridad = prioridad;
 }
 
 // Función para obtener el estado de un PCB
-int obtenerEstado(struct PCB* pcb) {
+int obtenerEstado(PCB* pcb) {
     return pcb->estado;
 }
 
 // Función para establecer el estado de un PCB
-void establecerEstado(struct PCB* pcb, int estado) {
+void establecerEstado( PCB* pcb, int estado) {
     pcb->estado = estado;
 }
 
 // Función para obtener el tiempo de creación de un PCB
-time_t obtenerMomentoCreacion(struct PCB* pcb) {
+time_t obtenerMomentoCreacion( PCB* pcb) {
     return pcb->tiempo_de_vida.creacion;
 }
 
 // Función para obtener el tiempo asignado de un PCB
-int obtenerTiempoAsignado(struct PCB* pcb) {
+int obtenerTiempoAsignado(PCB* pcb) {
     return pcb->tiempo_de_vida.tiempo_asignado;
 }
 
 // Función para establecer el tiempo asignado de un PCB
-void establecerTiempoAsignado(struct PCB* pcb, int tiempo_asignado) {
+void establecerTiempoAsignado( PCB* pcb, int tiempo_asignado) {
     pcb->tiempo_de_vida.tiempo_asignado = tiempo_asignado;
 }
 
 // Función para obtener el estado de un PCB en forma legible
-const char* obtenerEstadoLegible(struct PCB* pcb) {
+const char* obtenerEstadoLegible( PCB* pcb) {
     if (pcb->estado == 2) {
         return "Running";
     } else if (pcb->estado == 1) {
@@ -104,9 +103,11 @@ const char* obtenerEstadoLegible(struct PCB* pcb) {
 }
 
 // Función para cambiar el estado de un PCB
-void cambiarEstado(struct PCB* pcb, int nuevoEstado) {
+void cambiarEstado(PCB* pcb, int nuevoEstado) {
     pcb->estado = nuevoEstado;
 }
 
-
+ void destroyPCB(PCB* pcb) {
+    free(pcb);
+ }
 
