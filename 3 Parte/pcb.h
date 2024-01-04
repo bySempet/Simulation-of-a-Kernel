@@ -8,9 +8,9 @@
 
 // Estructura para representar la memoria de un proceso
 typedef struct mm{
-    void* code; // Puntero a la dirección virtual de comienzo del segmento de código
-    void* data; // Puntero a la dirección virtual de comienzo del segmento de datos
-    void* pgb; // Puntero a la dirección física de la correspondiente tabla de páginas
+    int code; // Puntero a la dirección virtual de comienzo del segmento de código
+    int data; // Puntero a la dirección virtual de comienzo del segmento de datos
+    int pgb; // Puntero a la dirección física de la correspondiente tabla de páginas
 } mm;
 
 // Estructura para representar el tiempo de vida de un proceso
@@ -47,9 +47,9 @@ typedef struct PCB {
 
     pcb->estado = estado;
 
-    pcb->mm.code = NULL; 
-    pcb->mm.data = NULL; 
-    pcb->mm.pgb = NULL; 
+    pcb->mm.code = 0; 
+    pcb->mm.data = 0; 
+    pcb->mm.pgb = 0; 
 
 
     return pcb;

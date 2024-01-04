@@ -28,7 +28,7 @@ typedef struct ColaDeColas {
 
 // Inicializa una cola de procesos vacía con una prioridad dada
 ProcesoQueue* inicializarProcesoQueue(int prioridad) {
-    struct ProcesoQueue* queue = malloc(sizeof(struct ProcesoQueue));
+     ProcesoQueue* queue = malloc(sizeof(struct ProcesoQueue));
     if (queue == NULL) 
     {
         printf("Error: No se pudo asignar memoria para la cola de procesos.\n");
@@ -44,7 +44,7 @@ ProcesoQueue* inicializarProcesoQueue(int prioridad) {
 
 // Inicializa una cola de colas de procesos
  ColaDeColas* inicializarColaDeColas(int numColas) {
-    struct ColaDeColas* colaDeColas = malloc(sizeof(struct ColaDeColas));
+    ColaDeColas* colaDeColas = malloc(sizeof(struct ColaDeColas));
     if (colaDeColas == NULL) {
         printf("Error: No se pudo asignar memoria para la cola de colas.\n");
         exit(1);

@@ -5,6 +5,12 @@
 #include <stdlib.h>
 #include "process_queue.h"
 
+// Estructura para representar una entrada en la MMU
+typedef struct {
+    int textAddress; // Dirección de texto en la memoria física
+    int dataAddress; // Dirección de datos en la memoria física
+} MMUEntry;
+
 // Estructura para representar un hilo
 typedef struct {
     int id; // Identificador del hilo
@@ -18,7 +24,7 @@ typedef struct {
     int id; // Identificador del núcleo
     int numThreads; // Número de hilos en el núcleo
     Thread *threads; // Arreglo de hilos en el núcleo
-   
+    MMUEntry *MMU; // MMU del núcleo
 } Core;
 
 // Estructura para representar una CPU
@@ -70,7 +76,11 @@ Core *createCore(int id, int numThreads) {
     for (int i = 0; i < numThreads; i++) {
         core->threads[i] = *createThread(i);
     }
-
+    core->MMU = malloc(numThreads * sizeof(MMUEntry)); // Inicializar la MMU del núcleo
+    if (core->MMU == NULL) {
+        perror("Error al asignar memoria para MMU en el núcleo");
+        exit(EXIT_FAILURE);
+    }
     return core;
 }
 
@@ -116,7 +126,21 @@ Machine *createMachine(int numCPUs, int numCoresPerCPU, int numThreadsPerCore) {
 
     return machine;
 }
+int getTextAddress(Core* core, int threadId) {
+    return core->MMU[threadId].textAddress;
+}
 
+int getDataAddress(Core* core, int threadId) {
+    return core->MMU[threadId].dataAddress;
+}
+
+void setTextAddress(Core* core, int threadId, int address) {
+    core->MMU[threadId].textAddress = address;
+}
+
+void setDataAddress(Core* core, int threadId, int address) {
+    core->MMU[threadId].dataAddress = address;
+}
 
 // Función para destruir un hilo
 void destroyThread(Thread *thread) {
@@ -130,6 +154,7 @@ void destroyCore(Core *core) {
         destroyThread(&(core->threads[i]));
     }
     free(core->threads);
+    free(core->MMU); // Liberar la memoria de la MMU
     free(core);
 }
 
