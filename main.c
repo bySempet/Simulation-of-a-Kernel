@@ -33,10 +33,10 @@ void *generador(void *arg)
 {
 
     srand(time(NULL)); // Para generar números aleatorios
-
-    //while (1) 
+    int i = 1;
+    while (1) 
    // {
-    for (int i = 1; i < 150; i++)
+   // for (int i = 1; i < 150; i++)
     {
         // Crear un nuevo PCB
         PCB* nuevoPCB = (PCB*)malloc(sizeof(PCB));
@@ -49,7 +49,8 @@ void *generador(void *arg)
         pthread_mutex_lock(&machine->mutex_maquina);
         agregarAQueueDePrioridad(coladecolas,nuevoPCB); 
         pthread_mutex_unlock(&machine->mutex_maquina);
-        sleep(2);
+        i++;
+        if (i % 10 == 0) sleep(10);
     }
   //  }
 
@@ -128,14 +129,13 @@ void *scheduler(void *arg)
         // Llenar la máquina con PCBs de la coladecolas
         for(int i=0; i<total; i++)
         {
-            PCB* pcb = inicializarPCB(0, 0, 0, 0);
-            pcb = dequeueColas(coladecolas);
+            PCB* pcb =  dequeueColas(coladecolas);
             if(insertarPCBenMaquina(maquina, pcb) == 0) 
             {
                 printf("Scheduler: No se pudo insertar el PCB %d en la máquina\n", pcb->identificador);
                 enqueue(&coladecolas->colas[pcb->prioridad], pcb);
             } 
-            free(pcb);
+           // free(pcb);
         }
 
         pthread_mutex_unlock(&mutex_timer);
