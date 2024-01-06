@@ -208,7 +208,7 @@ void mostrarEstado(Machine  * Machine)
         {
             for (int k = 0; k < Machine->cpus[i].cores[j].numThreads; k++)
             {
-                printf("CPU: %d, Core: %d, Thread: %d, Tiempo asignado: %d\n", Machine->cpus[i].id, Machine->cpus[i].cores[j].id, Machine->cpus[i].cores[j].threads[k].id, Machine->cpus[i].cores[j].threads[k].pcb->tiempo_de_vida.tiempo_asignado);
+                printf("CPU: %d, Core: %d, Thread: %d, PCB: %d, Tiempo asignado: %d\n", Machine->cpus[i].id, Machine->cpus[i].cores[j].id, Machine->cpus[i].cores[j].threads[k].id, Machine->cpus[i].cores[j].threads[k].pcb->identificador,Machine->cpus[i].cores[j].threads[k].pcb->tiempo_de_vida.tiempo_asignado);
             }
         }
     }

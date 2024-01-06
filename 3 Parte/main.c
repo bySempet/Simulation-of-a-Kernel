@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include "machine.h"
+#include "memoriaFisica.h"
 
 
 //Inicializar las variables globales
@@ -21,6 +22,7 @@ typedef struct MachineType{
 Reloj* reloj; //Reloj de la maquina
 machineType * machine; //Mutex
 Machine* maquina; //Maquina
+PhysicalMemory* memoriaFisica; //Memoria fisica
 ColaDeColas* coladecolas; //Cola de colas
 int cpus, cores, hilos = 0; //Variables para la creacion de la maquina
 pthread_mutex_t mutex_reloj, mutex_timer; //Mutex para el reloj, la maquina y el timer
@@ -33,26 +35,66 @@ void *generador(void *arg)
 {
 
     srand(time(NULL)); // Para generar números aleatorios
-
-    //while (1) 
+    int i = 1;
+    while (1) 
    // {
-    for (int i = 1; i < 150; i++)
+   // for (int i = 1; i < 150; i++)
     {
         // Crear un nuevo PCB
         PCB* nuevoPCB = (PCB*)malloc(sizeof(PCB));
         nuevoPCB->identificador = i; // Establecer el identificador
-        nuevoPCB->prioridad = 1; //rand() % 97 + 1; Generar una prioridad aleatoria
+        nuevoPCB->prioridad = rand() % 97 + 1; //Generar una prioridad aleatoria
         nuevoPCB->tiempo_de_vida.creacion = time(NULL); // Establecer el tiempo de creación
-        nuevoPCB->tiempo_de_vida.tiempo_asignado = rand(); // Generar un tiempo de vida aleatorio
+        nuevoPCB->tiempo_de_vida.tiempo_asignado = rand() % 70 +1; // Generar un tiempo de vida aleatorio
         nuevoPCB->estado = 0; // Generar un estado (0, 1, 2)
         // Insertar el PCB en la cola de prioridad adecuada
         pthread_mutex_lock(&machine->mutex_maquina);
         agregarAQueueDePrioridad(coladecolas,nuevoPCB); 
         pthread_mutex_unlock(&machine->mutex_maquina);
-        sleep(2);
+        i++;
+        if(i % 10 == 0) sleep(5);
     }
   //  }
 
+}
+
+void *loader(void *arg)
+{
+    static int file_number = 0; // Variable estática que mantiene su valor entre las llamadas a la función
+    while (1)
+    {
+    
+        char filename[20];
+        sprintf(filename, "prog%03d.elf", file_number);
+
+        FILE *file = fopen(filename, "r");
+        if (file == NULL)
+        {
+            printf("No se pudo abrir el archivo %s\n", filename);
+            file_number++;
+            continue;
+        }
+
+        int code_start_address, data_start_address;
+        fscanf(file, ".text %d\n", &code_start_address);
+        fscanf(file, ".data %d\n", &data_start_address);
+
+        char line[10];
+        int address = code_start_address;
+        while (fgets(line, sizeof(line), file) && strcmp(line, "\n") != 0)
+        {
+
+        }
+
+        address = data_start_address;
+        while (fgets(line, sizeof(line), file))
+        {
+       
+        }
+        fclose(file);
+        file_number++;
+    }
+    return NULL;
 }
 
 void *timer(void *arg)
@@ -67,9 +109,7 @@ void *timer(void *arg)
         {
             pthread_mutex_lock(&mutex_timer);
             pthread_cond_signal(&cond_timer);
-            restarTiempo(maquina, 1);
-            printf("PCB:0 en la máquina:%d\n", maquina->cpus[0].cores[0].threads[0].pcb->identificador);
-            fflush(stdout);
+            restarTiempo(maquina, 5);
             mostrarEstado(maquina);
             pthread_mutex_unlock(&mutex_timer);
             printf("Temporizador: Se ha alcanzado un múltiplo de 5 segundos (%d segundos)\n", reloj->segundos);
@@ -128,14 +168,13 @@ void *scheduler(void *arg)
         // Llenar la máquina con PCBs de la coladecolas
         for(int i=0; i<total; i++)
         {
-            PCB* pcb = inicializarPCB(0, 0, 0, 0);
-            pcb = dequeueColas(coladecolas);
+            PCB* pcb =  dequeueColas(coladecolas);
             if(insertarPCBenMaquina(maquina, pcb) == 0) 
             {
                 printf("Scheduler: No se pudo insertar el PCB %d en la máquina\n", pcb->identificador);
                 enqueue(&coladecolas->colas[pcb->prioridad], pcb);
             } 
-            free(pcb);
+           
         }
 
         pthread_mutex_unlock(&mutex_timer);
@@ -157,6 +196,8 @@ void inizializarMaquina()
     //Inicializar la "maquina" 
     maquina = createMachine(cpus,cores,hilos);
     if(maquina == NULL) exit(EXIT_FAILURE);
+    //Inicializar la memoria fisica
+    memoriaFisica = createPhysicalMemory();
     //Inicializar la cola donde se guardaran los procesos
     coladecolas = inicializarColaDeColas(numColas);
     if(coladecolas == NULL) exit(EXIT_FAILURE);

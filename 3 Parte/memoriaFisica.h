@@ -10,8 +10,10 @@
 #define WORD_SIZE 4
 #define SIZE (1 << ADDRESS_BUS)
 
+// Estructura para representar la memoria física
 typedef struct PhysicalMemory {
     char *memory;
+    int *ocupado;
     int start; // inicio de la memoria
     int end; // final de la memoria
     int currentPos; // posicion actual
@@ -22,7 +24,7 @@ typedef struct PhysicalMemory {
 
 
 PhysicalMemory* createPhysicalMemory() {
-    PhysicalMemory* mem = (PhysicalMemory*)(sizeof (PhysicalMemory));
+    PhysicalMemory* mem = (PhysicalMemory*)malloc(sizeof (PhysicalMemory));
     mem->start = 0;
     mem->end = SIZE;
     mem->currentPos = 0;
@@ -30,6 +32,7 @@ PhysicalMemory* createPhysicalMemory() {
     mem->dataStart = SIZE / 3; // inicio de la seccion de datos
     mem->pageTableStart = 2 * SIZE / 3; // inicio de la seccion de la tabla de paginas
     mem->memory = (char*) malloc(SIZE);
+    mem->ocupado = (int*) malloc(SIZE);
     return mem;
 }
 
@@ -47,14 +50,17 @@ char* getPageTable(PhysicalMemory* mem, int address) {
 
 void writeText(PhysicalMemory* mem, int address, char value) {
     mem->memory[mem->textStart + address] = value;
+    mem->ocupado[mem->textStart + address] = 1;
 }
 
 void writeData(PhysicalMemory* mem, int address, char value) {
     mem->memory[mem->dataStart + address] = value;
+    mem->ocupado[mem->dataStart + address] = 1;
 }
 
 void writePageTable(PhysicalMemory* mem, int address, char value) {
     mem->memory[mem->pageTableStart + address] = value;
+    mem->ocupado[mem->pageTableStart + address] = 1;
 }
 
 void destroyPhysicalMemory(PhysicalMemory* mem) {
