@@ -31,7 +31,7 @@ pthread_cond_t cond_timer; //Variable de condicion para el timer
 //Funciones de los threads
 //Va a generar todos los pcbs y los va a ir metiendo en las queue
 //Proceso de tiempo limitado debido a que se generaran x PCBs
-void *generador(void *arg)
+/*void *generador(void *arg)
 {
 
     srand(time(NULL)); // Para generar números aleatorios
@@ -56,7 +56,7 @@ void *generador(void *arg)
     }
   //  }
 
-}
+}*/
 
 void *loader(void *arg)
 {
@@ -79,20 +79,47 @@ void *loader(void *arg)
         fscanf(file, ".text %d\n", &code_start_address);
         fscanf(file, ".data %d\n", &data_start_address);
 
+        char *code = malloc(1000 * sizeof(char));
+        char *data = malloc(1000 * sizeof(char));
+
         char line[10];
         int address = code_start_address;
-        while (fgets(line, sizeof(line), file) && strcmp(line, "\n") != 0)
+        while (address < data_start_address && fgets(line, sizeof(line), file))
         {
-
+            strcat(code, line);
+            address += 4; // Cada línea representa 4 direcciones
         }
 
-        address = data_start_address;
         while (fgets(line, sizeof(line), file))
         {
-       
+            strcat(data, line);
         }
+
         fclose(file);
+        
+        int pgb = writeInMemory(memoriaFisica, code, data);
+
+        // Crear un nuevo PCB
+        PCB* nuevoPCB = (PCB*)malloc(sizeof(PCB));
+        nuevoPCB->identificador = file_number; // Establecer el identificador
+        nuevoPCB->prioridad = rand() % 97 + 1; //Generar una prioridad aleatoria
+        nuevoPCB->tiempo_de_vida.creacion = time(NULL); // Establecer el tiempo de creación
+        nuevoPCB->tiempo_de_vida.tiempo_asignado = rand() % 70 +1; // Generar un tiempo de vida aleatorio
+        nuevoPCB->estado = 0; // Generar un estado (0, 1, 2)
+        mm * nuevoMM = (mm*)malloc(sizeof(mm));
+        nuevoMM->code = code_start_address;
+        nuevoMM->data = data_start_address;
+        nuevoMM->pgb = pgb;
+        nuevoPCB->mm = *nuevoMM;
+
+        // Insertar el PCB en la cola de prioridad adecuada
+        pthread_mutex_lock(&machine->mutex_maquina);
+        agregarAQueueDePrioridad(coladecolas,nuevoPCB); 
+        pthread_mutex_unlock(&machine->mutex_maquina);
+
         file_number++;
+        if(file_number % 10 == 0) sleep(5);
+        
     }
     return NULL;
 }
@@ -225,7 +252,7 @@ void inizializarHilos()
     int err;
   
     //Crear los threads
-    err = pthread_create(&thread_generador, NULL, generador, 0);
+    err = pthread_create(&thread_generador, NULL, loader, 0);
     if (err != 0) printf("\nError al crear el hilo generador :[%s]", strerror(err));
     err = pthread_create(&thread_timer, NULL, timer, 0);
     if (err != 0) printf("\nError al crear el hilo timer :[%s]", strerror(err));
